@@ -1,0 +1,45 @@
+{
+  "name": "pi-taskgraph",
+  "version": "0.1.0",
+  "description": "Dependency-aware task management extension for Pi Coding Agent",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YOUR_USERNAME/hello-world-extension.git"
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "keywords": ["pi-package"],
+  "main": "extensions/index.ts",
+  "files": [
+    "extensions",
+    "skills",
+    "src",
+    "package.json",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "vitest"
+  },
+  "dependencies": {
+    "uuid": "^13.0.0"
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": "^0.56.0",
+    "@sinclair/typebox": "^0.34.48"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "pi": {
+    "image": "https://raw.githubusercontent.com/YOUR_USERNAME/hello-world-extension/main/extension-icon.png",
+    "extensions": [
+      "extensions/index.ts"
+    ],
+    "skills": [
+      "skills"
+    ]
+  }
+}
