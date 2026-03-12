@@ -12,11 +12,18 @@ async function loadExtensionWithHarness(entries: unknown[] = []) {
 }
 
 describe.sequential('pi taskgraph extension tools', () => {
-    it('registers all four task tools', async () => {
+    it('registers all task tools', async () => {
         await withIsolatedTaskStoreContext(async () => {
             const harness = await loadExtensionWithHarness();
             const toolNames = [...harness.tools.keys()].sort();
-            expect(toolNames).toEqual(['task_create', 'task_get', 'task_list', 'task_update']);
+            expect(toolNames).toEqual([
+                'clear_tasks',
+                'get_batch_of_tasks',
+                'task_create',
+                'task_get',
+                'task_list',
+                'task_update'
+            ]);
         });
     });
 
@@ -43,8 +50,9 @@ describe.sequential('pi taskgraph extension tools', () => {
             const updateTool = harness.tools.get('task_update');
             const getTool = harness.tools.get('task_get');
             const listTool = harness.tools.get('task_list');
+            const clearTool = harness.tools.get('clear_tasks');
 
-            expect(createTool && updateTool && getTool && listTool).toBeTruthy();
+            expect(createTool && updateTool && getTool && listTool && clearTool).toBeTruthy();
 
             const createDependencyResult = await createTool!.execute(
                 'call-1',
@@ -100,10 +108,26 @@ describe.sequential('pi taskgraph extension tools', () => {
                 undefined,
                 harness.ctx
             );
+            const clearResult = await clearTool!.execute(
+                'call-8',
+                {},
+                undefined,
+                undefined,
+                harness.ctx
+            );
+            const listAfterClearResult = await listTool!.execute(
+                'call-9',
+                {},
+                undefined,
+                undefined,
+                harness.ctx
+            );
 
             expect(updateBlockedResult.content[0]?.text).toContain(`Updated task #${blockedTask.id}`);
             expect((getResult.details as { owner?: string }).owner).toBe('backend-dev');
             expect((listResult.details as { tasks: unknown[] }).tasks).toHaveLength(2);
+            expect((clearResult.details as { clearedCount: number }).clearedCount).toBe(2);
+            expect((listAfterClearResult.details as { tasks: unknown[] }).tasks).toHaveLength(0);
         });
     });
 

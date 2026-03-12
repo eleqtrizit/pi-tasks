@@ -59,6 +59,22 @@ describe.sequential('task-store core behavior', () => {
         });
     });
 
+    it('clears all tasks and returns number of deleted tasks', async () => {
+        await withIsolatedTaskStoreContext(async ({ taskStoreModule }) => {
+            const { TaskStore } = taskStoreModule;
+            const store = new TaskStore('core-clear');
+
+            await store.createTask({ subject: 'Task A' });
+            await store.createTask({ subject: 'Task B' });
+
+            const clearedCount = await store.clearTasks();
+            const remainingTasks = await store.listTasks();
+
+            expect(clearedCount).toBe(2);
+            expect(remainingTasks).toEqual([]);
+        });
+    });
+
     it('throws when getting a missing task', async () => {
         await withIsolatedTaskStoreContext(async ({ taskStoreModule }) => {
             const { TaskStore } = taskStoreModule;

@@ -74,6 +74,25 @@ export default function (pi: ExtensionAPI) {
         }
     });
 
+    pi.registerCommand('clear-tasks', {
+        description: 'Delete all tasks from the current task list',
+        handler: async (_args, ctx) => {
+            try {
+                const store = getStore(taskStore);
+                const clearedCount = await store.clearTasks();
+                await refreshWidget(ctx);
+                pi.sendMessage({
+                    customType: 'clear-tasks',
+                    content: `Cleared ${clearedCount} task(s).`,
+                    display: true
+                });
+            } catch (error: unknown) {
+                const message = getErrorMessage(error);
+                pi.sendMessage({ customType: 'clear-tasks', content: `clear-tasks failed: ${message}`, display: true });
+            }
+        }
+    });
+
     pi.registerTool({
         name: 'task_create',
         label: 'task_create',
@@ -182,6 +201,31 @@ export default function (pi: ExtensionAPI) {
                 const message = getErrorMessage(error);
                 return {
                     content: [{ type: 'text', text: `task_list failed: ${message}` }],
+                    details: { error: message }
+                };
+            }
+        }
+    });
+
+    pi.registerTool({
+        name: 'clear_tasks',
+        label: 'clear_tasks',
+        description: 'Delete all tasks in the current task list.',
+        parameters: TaskListParamsSchema as any,
+        async execute(_toolCallId, _params: Static<typeof TaskListParamsSchema>, _signal, _onUpdate, ctx) {
+            try {
+                const store = getStore(taskStore);
+                const clearedCount = await store.clearTasks();
+                await refreshWidget(ctx);
+
+                return {
+                    content: [{ type: 'text', text: `Cleared ${clearedCount} task(s).` }],
+                    details: { clearedCount }
+                };
+            } catch (error: unknown) {
+                const message = getErrorMessage(error);
+                return {
+                    content: [{ type: 'text', text: `clear_tasks failed: ${message}` }],
                     details: { error: message }
                 };
             }

@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -124,6 +124,17 @@ export class TaskStore {
             ...task,
             isBlocked: isDependencyBlocked(tasksById, task)
         }));
+    }
+
+    public async clearTasks(): Promise<number> {
+        await this.ensureListDirectory();
+        const entries = await readdir(this.listDirectory, { withFileTypes: true });
+        const taskFiles = entries
+            .filter((entry) => entry.isFile() && entry.name.endsWith('.json'))
+            .map((entry) => join(this.listDirectory, entry.name));
+
+        await Promise.all(taskFiles.map(async (taskFilePath) => unlink(taskFilePath)));
+        return taskFiles.length;
     }
 
     public async updateTask(params: TaskUpdateParams): Promise<Task> {
