@@ -26,7 +26,7 @@ describe('task-widget rendering', () => {
         ]);
     });
 
-    it('renders counts and symbols for mixed statuses', () => {
+    it('renders counts and symbols for mixed statuses while hiding completed tasks from the widget body', () => {
         const lines = renderTaskWidget([
             makeTask({ id: '1', subject: 'Done', status: 'completed' }),
             makeTask({ id: '2', subject: 'Working', status: 'in_progress', owner: 'agent-a' }),
@@ -35,7 +35,7 @@ describe('task-widget rendering', () => {
         ]);
 
         expect(lines[0]).toBe('Tasks (1 done, 1 in progress, 2 open)');
-        expect(lines).toContain('✓ #1 Done');
+        expect(lines).not.toContain('✓ #1 Done');
         expect(lines).toContain('■ #2 Working (agent-a)');
         expect(lines).toContain('⚠ #3 Blocked > blocked by #2');
         expect(lines).toContain('□ #4 Open');

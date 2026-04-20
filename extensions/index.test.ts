@@ -56,14 +56,14 @@ describe.sequential('pi taskgraph extension tools', () => {
 
             const createDependencyResult = await createTool!.execute(
                 'call-1',
-                { subject: 'Dependency' },
+                { subject: 'Dependency', addBlockedBy: [] },
                 undefined,
                 undefined,
                 harness.ctx
             );
             const createBlockedResult = await createTool!.execute(
                 'call-2',
-                { subject: 'Blocked task' },
+                { subject: 'Blocked task', addBlockedBy: [] },
                 undefined,
                 undefined,
                 harness.ctx
@@ -131,6 +131,25 @@ describe.sequential('pi taskgraph extension tools', () => {
         });
     });
 
+    it('returns a targeted error when task_create omits addBlockedBy', async () => {
+        await withIsolatedTaskStoreContext(async () => {
+            const harness = await loadExtensionWithHarness();
+            const createTool = harness.tools.get('task_create')!;
+
+            const createResult = await createTool.execute(
+                'call-missing-addBlockedBy',
+                { subject: 'Whitespace cleanup' },
+                undefined,
+                undefined,
+                harness.ctx
+            );
+
+            expect(createResult.content[0]?.text).toContain('task_create failed');
+            expect((createResult.details as { error?: string }).error).toContain('Missing required field `addBlockedBy`');
+            expect((createResult.details as { error?: string }).error).toContain('addBlockedBy: []');
+        });
+    });
+
     it('returns predictable errors for missing and blocked tasks', async () => {
         await withIsolatedTaskStoreContext(async () => {
             const harness = await loadExtensionWithHarness();
@@ -140,14 +159,14 @@ describe.sequential('pi taskgraph extension tools', () => {
 
             const dependencyResult = await createTool.execute(
                 'call-1',
-                { subject: 'Dependency' },
+                { subject: 'Dependency', addBlockedBy: [] },
                 undefined,
                 undefined,
                 harness.ctx
             );
             const blockedResult = await createTool.execute(
                 'call-2',
-                { subject: 'Blocked task' },
+                { subject: 'Blocked task', addBlockedBy: [] },
                 undefined,
                 undefined,
                 harness.ctx

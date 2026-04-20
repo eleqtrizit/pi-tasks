@@ -97,9 +97,17 @@ export default function (pi: ExtensionAPI) {
         name: 'task_create',
         label: 'task_create',
         description:
-            'Create a new dependency-aware task. Add dependencies by specifying the task IDs in the `addBlockedBy` array. E.g. `addBlockedBy: ["1", "2"]`',
+            'Create a new dependency-aware task. `addBlockedBy` is REQUIRED on every call. If the task has no dependencies, you MUST pass `addBlockedBy: []`. If the task depends on other tasks, pass their task IDs in `addBlockedBy`, e.g. `addBlockedBy: ["1", "2"]`.',
         parameters: TaskCreateParamsSchema as any,
         async execute(_toolCallId, params: Static<typeof TaskCreateParamsSchema>, _signal, _onUpdate, ctx) {
+            if (!Array.isArray((params as { addBlockedBy?: unknown }).addBlockedBy)) {
+                const message = 'Missing required field `addBlockedBy`. Pass `addBlockedBy: []` when the task has no dependencies.';
+                return {
+                    content: [{ type: 'text', text: `task_create failed: ${message}` }],
+                    details: { error: message }
+                };
+            }
+
             try {
                 const store = getStore(taskStore);
                 const task = await store.createTask(params);
