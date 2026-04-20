@@ -97,7 +97,7 @@ export default function (pi: ExtensionAPI) {
         name: 'task_create',
         label: 'task_create',
         description:
-            'Create a new dependency-aware task. `addBlockedBy` is REQUIRED on every call. If the task has no dependencies, you MUST pass `addBlockedBy: []`. If the task depends on other tasks, pass their task IDs in `addBlockedBy`, e.g. `addBlockedBy: ["1", "2"]`.',
+            'Create a new dependency-aware task. `addBlockedBy` is REQUIRED on every call. If the task has no dependencies, you MUST pass `addBlockedBy: []`. If the task depends on other tasks, pass their task IDs in `addBlockedBy`.\n\nIMPORTANT: Task IDs are assigned sequentially at creation time ("1", "2", "3"...). You cannot reference tasks that haven\'t been created yet. Create tasks in dependency order: first create foundation tasks with `addBlockedBy: []`, then create dependent tasks using the returned IDs. Use `task_list` to discover existing task IDs.',
         parameters: TaskCreateParamsSchema as any,
         async execute(_toolCallId, params: Static<typeof TaskCreateParamsSchema>, _signal, _onUpdate, ctx) {
             if (!Array.isArray((params as { addBlockedBy?: unknown }).addBlockedBy)) {
