@@ -1,6 +1,6 @@
 {
   "name": "pi-taskgraph",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Dependency-aware task management extension for Pi Coding Agent",
   "repository": {
     "type": "git",
