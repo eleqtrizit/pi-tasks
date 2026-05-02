@@ -81,6 +81,10 @@ export function renderTaskList(taskItems: TaskListItem[]): string {
 }
 
 export function renderTaskWidget(taskItems: TaskListItem[]): string[] {
+  if (taskItems.length === 0) {
+    return [];
+  }
+
   const completedCount = taskItems.filter(
     (task) => task.status === "completed",
   ).length;
@@ -92,9 +96,6 @@ export function renderTaskWidget(taskItems: TaskListItem[]): string[] {
   ).length;
 
   const header = `Tasks (${completedCount} done, ${inProgressCount} in progress, ${openCount} open)`;
-  if (taskItems.length === 0) {
-    return [header, "No tasks yet."];
-  }
 
   const sortedTasks = [...taskItems].sort(
     (a, b) => Number(a.id) - Number(b.id),

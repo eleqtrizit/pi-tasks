@@ -20,10 +20,7 @@ function makeTask(overrides: Partial<TaskListItem>): TaskListItem {
 describe("task-widget rendering", () => {
   it("renders empty state", () => {
     const lines = renderTaskWidget([]);
-    expect(lines).toEqual([
-      "Tasks (0 done, 0 in progress, 0 open)",
-      "No tasks yet.",
-    ]);
+    expect(lines).toEqual([]);
   });
 
   it("renders counts and symbols for mixed statuses while hiding completed tasks from the widget body", () => {
