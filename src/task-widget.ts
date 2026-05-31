@@ -7,11 +7,15 @@ function getStatusSymbol(task: TaskListItem): string {
     return "✓";
   }
 
+  if (task.isBlocked) {
+    return "⚠";
+  }
+
   if (task.status === "in_progress") {
     return "■";
   }
 
-  return task.isBlocked ? "⚠" : "□";
+  return "□";
 }
 
 function formatBlockedBy(task: TaskListItem): string {
@@ -100,16 +104,20 @@ export function renderTaskWidget(taskItems: TaskListItem[]): string[] {
   const sortedTasks = [...taskItems].sort(
     (a, b) => Number(a.id) - Number(b.id),
   );
-  const incompleteTasks = sortedTasks.filter(
-    (task) => task.status !== "completed",
+  const inProgressTasks = sortedTasks.filter(
+    (task) => task.status === "in_progress",
   );
-  const visibleTasks = incompleteTasks
+  const visibleTasks = inProgressTasks
     .slice(0, MAX_VISIBLE_TASKS)
     .map(formatTaskLine);
-  const hiddenCount = incompleteTasks.length - visibleTasks.length;
+  const hiddenCount = inProgressTasks.length - visibleTasks.length;
 
   if (hiddenCount > 0) {
-    visibleTasks.push(`... +${hiddenCount} more (run /list-tasks to show all)`);
+    visibleTasks.push(`... +${hiddenCount} more in progress (run /list-tasks to show all)`);
+  }
+
+  if (visibleTasks.length === 0) {
+    return [header];
   }
 
   return [header, ...visibleTasks];

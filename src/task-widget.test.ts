@@ -23,7 +23,7 @@ describe("task-widget rendering", () => {
     expect(lines).toEqual([]);
   });
 
-  it("renders counts and symbols for mixed statuses while hiding completed tasks from the widget body", () => {
+  it("renders counts and only in-progress tasks in the widget body", () => {
     const lines = renderTaskWidget([
       makeTask({ id: "1", subject: "Done", status: "completed" }),
       makeTask({
@@ -45,16 +45,16 @@ describe("task-widget rendering", () => {
     expect(lines[0]).toBe("Tasks (1 done, 1 in progress, 2 open)");
     expect(lines).not.toContain("✓ #1 Done");
     expect(lines).toContain("■ #2 Working (agent-a)");
-    expect(lines).toContain("⚠ #3 Blocked > blocked by #2");
-    expect(lines).toContain("□ #4 Open");
+    expect(lines).not.toContain("⚠ #3 Blocked");
+    expect(lines).not.toContain("□ #4 Open");
   });
 
-  it("renders blocked dependencies with comma-separated ids", () => {
+  it("renders blocked dependencies with comma-separated ids for in-progress tasks", () => {
     const lines = renderTaskWidget([
       makeTask({
         id: "7",
         subject: "Needs deps",
-        status: "pending",
+        status: "in_progress",
         isBlocked: true,
         blockedBy: ["1", "2", "5"],
       }),
@@ -63,18 +63,29 @@ describe("task-widget rendering", () => {
     expect(lines).toContain("⚠ #7 Needs deps > blocked by #1, #2, #5");
   });
 
-  it("truncates after 5 tasks and points to /list-tasks", () => {
+  it("shows only header when no in-progress tasks exist", () => {
+    const lines = renderTaskWidget([
+      makeTask({ id: "1", subject: "Done", status: "completed" }),
+      makeTask({ id: "2", subject: "Pending", status: "pending" }),
+    ]);
+
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toBe("Tasks (1 done, 0 in progress, 1 open)");
+  });
+
+  it("truncates after 5 in-progress tasks and points to /list-tasks", () => {
     const tasks = Array.from({ length: 12 }, (_, index) =>
       makeTask({
         id: String(index + 1),
         subject: `Task ${index + 1}`,
+        status: "in_progress",
       }),
     );
 
     const lines = renderTaskWidget(tasks);
     expect(lines).toHaveLength(7);
-    expect(lines[1]).toBe("□ #1 Task 1");
-    expect(lines[5]).toBe("□ #5 Task 5");
-    expect(lines[6]).toBe("... +7 more (run /list-tasks to show all)");
+    expect(lines[1]).toBe("■ #1 Task 1");
+    expect(lines[5]).toBe("■ #5 Task 5");
+    expect(lines[6]).toBe("... +7 more in progress (run /list-tasks to show all)");
   });
 });
